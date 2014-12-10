@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+set -o xtrace
+
+# CONTEXT: HOST prior to IMAGE BUILD as SCRIPT USER
+# PURPOSE: stages the vertica_7.1.1-0_amd64.deb file, so that te guest image has the package file.
+
+source $_LIB/die
+
+[ -n "$TMP_HOOKS_PATH." ] || die "Temp hook path not set"
+
+echo ${TMP_HOOKS_PATH}
+dd if=${REDSTACK_SCRIPTS}/files/vertica_7.1.1-0_amd64.deb  of=${TMP_HOOKS_PATH}/vertica_7.1.1-0_amd64.deb
+pwd
