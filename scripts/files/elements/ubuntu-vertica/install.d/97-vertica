@@ -14,6 +14,8 @@ dpkg -i /vertica_7.1.1-0_amd64.deb
 # Creating dbadmin user
 groupadd verticadba
 useradd -g verticadba -d /home/dbadmin -s /bin/bash -m dbadmin
+echo "export PATH=/opt/vertica/bin:\$PATH" >> ~dbadmin/.profile
+echo "export TZ='America/New_York'" >>  ~dbadmin/.profile
 
 # Base Directory for database creation
 mkdir /var/lib/vertica
@@ -22,7 +24,9 @@ chown dbadmin:verticadba /var/lib/vertica
 # Adding keys to root and dbadmin user
 mkdir -p ~root/.ssh
 cp -p ~ubuntu/.ssh/id_rsa* ~root/.ssh
-chown root:root ~root/.ssh/id_rsa*
+cp -p ~ubuntu/.ssh/authorized_keys ~root/.ssh/
+chown root:root ~root/.ssh
+
 mkdir ~dbadmin/.ssh
 cp -p  ~ubuntu/.ssh/id_rsa* ~dbadmin/.ssh/
 cp -p ~ubuntu/.ssh/authorized_keys ~dbadmin/.ssh/
@@ -30,21 +34,3 @@ chown -R dbadmin:verticadba ~dbadmin/.ssh
 
 # Taking backup of /etc/hosts
 cp -p /etc/hosts /etc/hosts.bkp
-
-#check for directory existance
-if [ ! -d '/opt/vertica/lib64' ]; then
-    exit 'lib64 missing'
-fi
-
-#Adding vertica related config files in /etc
-echo "[Driver]
-DriverManagerEncoding=UTF-16
-ODBCInstLib=/usr/lib/x86_64-linux-gnu/libodbcinst.so
-ErrorMessagesPath=/opt/vertica/lib64
-LogLevel=4
-LogPath=/tmp" > vertica.ini
-echo "[vertica]
-Driver=/opt/vertica/lib64/libverticaodbc.so
-Setup=/opt/vertica/lib64/libverticaodbc.so" > odbcinst.ini
-install --backup --suffix=".default" odbcinst.ini /etc/
-install --backup --suffix=".default" vertica.ini /etc/
